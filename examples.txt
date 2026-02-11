@@ -1,0 +1,150 @@
+==================================
+2.1 FIXED POINT COMBINATOR
+==================================
+sum =
+  letrec sum : Nat -> Nat -> Nat =
+    lambda n : Nat. lambda m : Nat. if iszero n then m else succ (sum (pred n) m)
+  in
+    sum
+;;
+
+prod =
+  letrec prod : Nat -> Nat -> Nat =
+    lambda n : Nat. lambda m : Nat. if iszero m then 0 else sum n (prod n (pred m))
+  in
+    prod
+;;
+
+fib= letrec fib : Nat -> Nat =
+  lambda n : Nat.
+    if iszero n then
+      0
+    else if iszero (pred n) then
+      1
+    else
+      sum (fib (pred n)) (fib (pred (pred n)))
+in fib
+
+
+fact=letrec fact : Nat -> Nat =
+  lambda x:Nat.
+    if iszero x then 1 else prod x (fact (pred x))
+in fact
+
+
+=============
+2.6 VARIANTS
+=============
+Int = <pos:Nat, zero:Bool, neg:Nat>;;
+
+p3 = <pos=3> as Int;;
+z0 = <zero=true> as Int;;
+n5 = <neg=5> as Int;;
+
+abs = lambda i : Int.
+case i of
+<pos=p> => (<pos=p> as Int)
+| <zero=z> => (<zero=true> as Int)
+| <neg=n> => (<pos=n> as Int);;
+
+
+
+eq=
+ letrec eq: Nat->Nat->Bool=
+  lambda x:Nat. lambda y:Nat.
+    if iszero x then iszero y
+    else if iszero y then false
+    else eq (pred x ) (pred y)
+ in eq
+ ;;
+
+ge =
+  letrec ge : Nat -> Nat -> Bool =
+    lambda a : Nat. lambda b : Nat.
+      if iszero b then
+        true
+      else if iszero a then
+        false
+      else
+        ge (pred a) (pred b)
+  in
+    ge
+;;
+
+sub =
+  letrec sub : Nat -> Nat -> Nat =
+    lambda a : Nat. lambda b : Nat.
+      if iszero b then
+        a
+      else
+        sub (pred a) (pred b)
+  in
+    sub
+;;
+
+
+add =
+  letrec sum : Nat -> Nat -> Nat =
+    lambda n : Nat. lambda m : Nat.
+      if iszero n then m
+      else succ (sum (pred n) m)
+  in
+  letrec add : Int -> Int -> Int =
+    lambda x : Int. lambda y : Int.
+      (case x of
+        <pos = p> =>
+          (case y of
+            <pos = q> => (<pos = sum p q> as Int)
+          | <zero = z> => x
+          | <neg = q> =>
+              if eq p q then (<zero = true> as Int)
+              else if ge p q then (<pos = sub p q> as Int)
+              else (<neg = sub q p> as Int))
+      | <zero = z> => y
+      | <neg = p> =>
+          (case y of
+            <pos = q> =>
+              if eq p q then (<zero = true> as Int)
+              else if ge p q then (<neg = sub p q> as Int)
+              else (<pos = sub q p> as Int)
+          | <zero = z2> => x
+          | <neg = q> => (<neg = sum p q> as Int)))
+  in add
+;;
+
+**Positive + Positive** → Add the numbers: `sum p q`
+**Positive + Zero** → Just return the positive number: `x`
+**Positive + Negative** → Subtraction! Compare magnitudes and determine sign
+**Zero + Anything** → Return the other number: `y`
+**Negative + Positive** → Subtraction! Compare magnitudes and determine sign
+**Negative + Zero** → Just return the negative number: `x`
+**Negative + Negative** → Add the magnitudes, keep it negative: `sum p q`
+
+
+============
+2.7 LISTS
+============
+
+l1 = cons [Nat] 1 (cons [Nat] 2 (nil [Nat]));;
+l2 = cons [Nat] 3 (cons [Nat] 4 (nil [Nat]));;
+
+length =
+  letrec length : List[Nat] -> Nat =
+    lambda l : List[Nat]. if isnil[Nat] l then 0 else sum 1 (length (tail[Nat] l))
+  in
+    length
+;;
+
+(Define T=Type)
+append = letrec appen : List[T] -> List[T] -> List[T] =
+  lambda xs : List[T]. lambda ys : List[T].
+    if isnil[T] xs then ys else cons[T] (head[T] xs) (appen (tail[T] xs) ys) in appen;;
+
+
+map = letrec map : (Nat -> Nat) -> List[Nat] -> List[Nat] =
+  lambda f : Nat -> Nat. lambda xs : List[Nat].
+    if isnil[Nat] xs then nil[Nat] else cons[Nat] (f (head[Nat] xs)) (map f (tail[Nat] xs)) in map;;
+
+double = lambda x : Nat. sum x x;;
+
+map double l1;;
